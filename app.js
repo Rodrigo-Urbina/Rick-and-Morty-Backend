@@ -27,21 +27,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // CORS Allowance
-app.use((req, res, next) => {
-  // Podemos cambiar la estrella por nuestro dominio
-  res.header("Access-Control-Allow-Origin", "*");
-  // Podemos cambiar la estrella por Origin, X-Requested-With,
-  // Content-Type, Accept, Authorization
-  res.header("Access-Control-Allow-Headers", "*");
-  if (req.method === "OPTIONS") {
-    // Podemos cambiar la estrella por GET, POST, PUT, PATCH, DELETE
-    res.header("Access-Control-Allow-Methods", "*");
-    return res.status(200).json({});
-  }
-  next();
-});
-
-// app.use(cors());
+app.use(cors());
 
 // get Basic Routes
 app.get("/", (req, res) => {

@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const Character = require("../models/characters");
 const Controller = require("../controllers/characters");
+const checkAuth = require('../middleware/check-auth');
 
 // Get all Characters and add pagination
-router.get('/', async(req, res) => {
+router.get('/', checkAuth, async(req, res) => {
     let characters;
     if(req.query.page) {
         characters = await Controller.getCharactersbyPages(req.query.page);
@@ -16,14 +17,14 @@ router.get('/', async(req, res) => {
 });
 
 // Create a new Character
-router.post('/', async(req, res) => {
+router.post('/', checkAuth, async(req, res) => {
     const character = new Character(req.body);
     const savedCharacter = await Controller.postCharacter(character);
     res.json(savedCharacter);
 });
 
 // Get a specific Character or multiple Characters
-router.get("/:id", async(req, res) => {
+router.get("/:id", checkAuth, async(req, res) => {
     let result;
     if((req.params.id).search(",")) {
         const arr = (req.params.id).split`,`.map(x => +x);
@@ -36,13 +37,13 @@ router.get("/:id", async(req, res) => {
 });
 
 // Update a Character
-router.patch('/:id', async(req, res) => {
+router.patch('/:id', checkAuth, async(req, res) => {
     const character = await Controller.updateCharacter(req.params.id, req.body);
     res.json(character);
 })
 
 // Delete a Character
-router.delete('/:id', async(req, res) => {
+router.delete('/:id', checkAuth, async(req, res) => {
     const character = await Controller.deleteCharacter(req.params.id);
     res.json(character);
 })
