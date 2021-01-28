@@ -69,4 +69,5 @@ app.use("/characters", characterRoutes);
 app.use("/episodes", episodeRoutes);
 app.use("/locations", locationRoutes);
 
+// Export the whole app into server.js
 module.exports = app;
