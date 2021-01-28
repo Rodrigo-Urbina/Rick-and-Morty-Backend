@@ -2,9 +2,10 @@ const express = require("express");
 const router = express.Router();
 const Episode = require("../models/episodes");
 const Controller = require("../controllers/episodes");
+const checkAuth = require('../middleware/check-auth');
 
 // Get all Episodes and add pagination
-router.get("/", async (req, res) => {
+router.get("/", checkAuth, async (req, res) => {
   let episodes;
   if (req.query.page) {
     episodes = await Controller.getEpisodesbyPages(req.query.page);
@@ -16,14 +17,14 @@ router.get("/", async (req, res) => {
 });
 
 // Create a new Episode
-router.post("/", async (req, res) => {
+router.post("/", checkAuth, async (req, res) => {
   const episode = new Episode(req.body);
   const savedEpisode = await Controller.postEpisode(episode);
   res.json(savedEpisode);
 });
 
 // Get a specific Episode or multiple Episodes
-router.get("/:id", async (req, res) => {
+router.get("/:id", checkAuth, async (req, res) => {
   let result;
   if (req.params.id.search(",")) {
     const arr = req.params.id.split`,`.map((x) => +x);
@@ -36,13 +37,13 @@ router.get("/:id", async (req, res) => {
 });
 
 // Update an Episode
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", checkAuth, async (req, res) => {
   const episode = await Controller.updateEpisode(req.params.id, req.body);
   res.json(episode);
 });
 
 // Delete an Episode
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", checkAuth, async (req, res) => {
   const episode = await Controller.deleteEpisode(req.params.id);
   res.json(episode);
 });
