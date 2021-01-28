@@ -8,11 +8,25 @@ const checkAuth = require('../middleware/check-auth');
 router.get('/', checkAuth, async(req, res) => {
     let characters;
     if(req.query.page) {
-        characters = await Controller.getCharactersbyPages(req.query.page);
+        if(req.query.pageSize){
+            characters = await Controller.getCharactersbyPages(req.query.page, req.query.pageSize);
+        }
+        else{
+            characters = await Controller.getCharactersbyPages(req.query.page);
+        }
+        
     } else {
-        characters = await Controller.getAllCharacters();
+        if(req.query.pageSize){
+            characters = await Controller.getCharactersbyPages(1, req.query.pageSize);            
+        }
+        else {
+            characters = await Controller.getAllCharacters();
+        }
     }
 
+    if(isEmpty(characters.results)){
+        return res.status(400).json({error: "Bad request", "status": 400});
+    }
     res.json(characters);
 });
 
@@ -26,10 +40,19 @@ router.post('/', checkAuth, async(req, res) => {
 // Get a specific Character or multiple Characters
 router.get("/:id", checkAuth, async(req, res) => {
     let result;
-    if((req.params.id).search(",")) {
+    if((req.params.id).search(",")>0) {
         const arr = (req.params.id).split`,`.map(x => +x);
+
+        if(arr.includes(NaN)){
+            return res.status(400).json({error: "Bad request", "status": 400});
+        }
+        
         result = await Controller.getMultipleCharacters(arr);
     } else {
+        console.log(req.params.id)
+        if(isNaN(parseInt(req.params.id))){
+            return res.status(400).json({error: "Bad request", "status": 400});
+        }
         result = await Controller.getSpecificCharacter(req.params.id);
     }
 
@@ -49,3 +72,21 @@ router.delete('/:id', checkAuth, async(req, res) => {
 })
 
 module.exports = router;
+
+
+
+
+
+
+function isEmpty(obj){
+    if (obj == null) return true;
+ 
+    if (obj.length && obj.length > 0)    return false;
+    if (obj.length === 0)  return true;
+
+    for (var key in obj) {
+        if (hasOwnProperty.call(obj, key)) return false;
+    }
+ 
+    return true;
+}

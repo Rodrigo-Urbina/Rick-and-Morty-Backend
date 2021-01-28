@@ -20,12 +20,19 @@ router.get("/", async (req, res, next) => {
 
 // Register a new User
 router.post("/signup", async (req, res, next) => {
+  const validator = new User(req.body);
+  let error = validator.validateSync();
 
+  if(error){
+    return res.status(400).json({error: "Bad request", "status": 400});
+  }
+  
   const duplicate = await Controller.alreadyExists(req.body.email);
 
   if(duplicate) {
     return res.json({
-      message: "This email has already been registered"
+      message: "This email has already been registered",
+      status: 409
     })
   }
 
@@ -48,15 +55,6 @@ router.post("/signup", async (req, res, next) => {
     }
   });
 
-  // //1
-  // console.log("enters signup");
-
-  // const user = new User(req.body);
-  // const savedUser = await Controller.postUser(user);
-  // //3
-  // console.log("savedUser", savedUser);
-  // //4
-  // res.json(savedUser);
 });
 
 // Login with Credentials
@@ -64,7 +62,8 @@ router.post("/login", async (req, res, next) => {
   const user = await User.find({ email: req.body.email });
   if (user.length === 0) {
     return res.json({
-      error: "Email not found",
+      error: "User not found",
+      status: 404
     });
   }
   bcrypt.compare(req.body.password, user[0].password, (err, result) => {
@@ -96,6 +95,7 @@ router.post("/login", async (req, res, next) => {
 
     res.json({
       error: "Auth Failed",
+      status: 401
     });
   });
 });

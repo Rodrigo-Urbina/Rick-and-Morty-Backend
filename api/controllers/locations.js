@@ -1,4 +1,5 @@
 const Location = require("../models/locations");
+const isEmpty = require('../middleware/isEmpty');
 
 module.exports = {
   getAllLocations,
@@ -77,6 +78,11 @@ async function postLocation(location) {
 
 async function getSpecificLocation(id) {
   const location = await Location.findOne({ id: id });
+
+  if(isEmpty(location)){
+    return {error: "Location not found", "status": 404};
+  }
+
   return location;
 }
 
