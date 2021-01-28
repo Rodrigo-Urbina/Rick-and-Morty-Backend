@@ -1,4 +1,5 @@
 const Character = require("../models/characters");
+const isEmpty = require('../middleware/isEmpty');
 
 module.exports = {
   getAllCharacters,
@@ -37,8 +38,8 @@ async function getCharactersbyPages(page, pageSize) {
   let actualPage = parseInt(page);
   let nextPage = actualPage + 1;
   let prevPage = actualPage - 1;
-  let elements = pageSize || 20;
-  let pos = (actualPage - 1) * pageSize;
+  let elements = parseInt(pageSize) || 20;
+  let pos = (actualPage - 1) * elements;
   let response = {
     info: {
       count: 0,
@@ -78,7 +79,12 @@ async function postCharacter(character) {
 }
 
 async function getSpecificCharacter(id) {
+  console.log('enters specific')
   const character = await Character.findOne({ id: id });
+  console.log(character);
+  if(isEmpty(character)|| character==null){
+    return {error: "Character not found", "status": 404};
+  }
   return character;
 }
 
@@ -105,3 +111,4 @@ async function deleteCharacter(id) {
   const character = await Character.findOneAndDelete({ id: id });
   return character;
 }
+

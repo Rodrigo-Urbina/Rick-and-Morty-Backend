@@ -3,6 +3,8 @@ const router = express.Router();
 const Location = require("../models/locations");
 const Controller = require("../controllers/locations");
 const checkAuth = require('../middleware/check-auth');
+const isEmpty = require('../middleware/isEmpty');
+
 
 // Get all Locations and add pagination
 router.get("/", checkAuth, async (req, res) => {
@@ -12,7 +14,9 @@ router.get("/", checkAuth, async (req, res) => {
   } else {
     locations = await Controller.getAllLocations();
   }
-
+  if(isEmpty(locations.results)){
+      return res.status(400).json({error: "Bad request", "status": 400});
+  }
   res.json(locations);
 });
 
@@ -26,10 +30,16 @@ router.post("/", checkAuth, async (req, res) => {
 // Get a specific Location or multiple Locations
 router.get("/:id", checkAuth, async (req, res) => {
   let result;
-  if (req.params.id.search(",")) {
+  if (req.params.id.search(",")>0) {
     const arr = req.params.id.split`,`.map((x) => +x);
+    if(arr.includes(NaN)){
+        return res.status(400).json({error: "Bad request", "status": 400});
+    }
     result = await Controller.getMultipleLocations(arr);
   } else {
+    if(isNaN(parseInt(req.params.id))){
+      return res.status(400).json({error: "Bad request", "status": 400});
+    }
     result = await Controller.getSpecificLocation(req.params.id);
   }
 

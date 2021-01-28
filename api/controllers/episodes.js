@@ -1,4 +1,5 @@
 const Episode = require("../models/episodes");
+const isEmpty = require('../middleware/isEmpty');
 
 module.exports = {
   getAllEpisodes,
@@ -77,6 +78,11 @@ async function postEpisode(episode) {
 
 async function getSpecificEpisode(id) {
   const episode = await Episode.findOne({ id: id });
+
+  if(isEmpty(episode)){
+    return {error: "Episode not found", "status": 404};
+  }
+
   return episode;
 }
 

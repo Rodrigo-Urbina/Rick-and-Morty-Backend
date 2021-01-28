@@ -33,28 +33,6 @@ async function alreadyExists(email){
 async function postUser(user) {
   const savedUser = await user.save();
   return savedUser;
-
-//   //2
-//   console.log("user", user);
-//   bcrypt.hash(user.password, saltRounds, async (err, hash) => {
-//     console.log("enters bcrypt");
-//     if (err) {
-//       return res.json({
-//         error: err,
-//       });
-//     } else {
-//       const newUser = new User({
-//         email: user.email,
-//         password: hash,
-//       });
-//       //5
-//       console.log("newUser", newUser);
-//       const savedUser = await newUser.save();
-//       //6
-//       console.log("bcrypt savedUser", savedUser);
-//       return savedUser;
-//     }
-//   });
 }
 
 async function loginUser(user) {
