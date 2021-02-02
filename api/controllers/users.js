@@ -40,7 +40,7 @@ async function loginUser(user) {
     if(savedUser.length < 1){
         return "Auth Failed";
     } else {
-        
+        return savedUser;
     }
 }
 

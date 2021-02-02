@@ -23,17 +23,17 @@ router.post("/signup", async (req, res, next) => {
   const validator = new User(req.body);
   let error = validator.validateSync();
 
-  if(error){
-    return res.status(400).json({error: "Bad request", "status": 400});
+  if (error) {
+    return res.status(400).json({ error: "Bad request", status: 400 });
   }
-  
+
   const duplicate = await Controller.alreadyExists(req.body.email);
 
-  if(duplicate) {
+  if (duplicate) {
     return res.json({
       message: "This email has already been registered",
       status: 409
-    })
+    });
   }
 
   bcrypt.hash(req.body.password, saltRounds, async (err, hash) => {
@@ -54,7 +54,6 @@ router.post("/signup", async (req, res, next) => {
       res.json(savedUser);
     }
   });
-
 });
 
 // Login with Credentials
@@ -74,18 +73,21 @@ router.post("/login", async (req, res, next) => {
     }
 
     if (result) {
-
-      const token = jwt.sign({
-        id: user[0]._id,
-        email: user[0].email, 
-        firstName: user[0].firstName,
-        lastName: user[0].lastName,
-        cellphone: user[0].cellphone,
-        favorites: user[0].favorites
-      }, process.env.SECRET_KEY, {
-        expiresIn: "1h"
-        // expiresIn: "15m"
-      })
+      const token = jwt.sign(
+        {
+          id: user[0]._id,
+          email: user[0].email,
+          firstName: user[0].firstName,
+          lastName: user[0].lastName,
+          cellphone: user[0].cellphone,
+          favorites: user[0].favorites
+        },
+        process.env.SECRET_KEY,
+        {
+          expiresIn: "1h"
+          // expiresIn: "15m"
+        }
+      );
 
       return res.json({
         message: "Auth Successful",
@@ -103,25 +105,37 @@ router.post("/login", async (req, res, next) => {
 // Update user information
 router.patch("/:email", async (req, res, next) => {
   const user = await Controller.updateUser(req.params.email, req.body);
+  if (user === null) {
+    return res.status(404).json({
+      message: "User not found",
+      status: 404
+    });
+  }
   res.json(user);
 });
 
 // Update user's password
-router.patch("/password/:email", async(req, res, next) => {
+router.patch("/password/:email", async (req, res, next) => {
   bcrypt.hash(req.body.password, saltRounds, async (err, hash) => {
     if (err) {
       return res.json({
-        error: err,
+        error: err
       });
     } else {
-      let newPass = { 
+      let newPass = {
         password: hash
       };
       let savedPass = await Controller.updateUser(req.params.email, newPass);
+      if(savedPass === null) {
+        return res.status(404).json({
+          message: "User not found",
+          status: 404
+        });
+      }
       res.json(savedPass);
     }
   });
-})
+});
 
 // Delete user
 router.delete("/:email", async (req, res, next) => {
@@ -130,9 +144,9 @@ router.delete("/:email", async (req, res, next) => {
 });
 
 // Get User's Favorites
-router.get("/favorites/:email", async(req, res) => {
+router.get("/favorites/:email", async (req, res) => {
   const favorites = await Controller.getFavorites(req.params.email);
   res.json(favorites);
-})
+});
 
 module.exports = router;
